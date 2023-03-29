@@ -22,9 +22,36 @@ from pygame.locals import (
 # Setup the clock for a decent framerate
 clock = pygame.time.Clock()
 
-SCREEN_WIDTH = 640
-SCREEN_HEIGHT = 480
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+
+class Projectile(pygame.sprite.Sprite):
+    def __init__(self, speed, start_pos, target_pos, image):
+        super().__init__()
+        self.surf = pygame.image.load(image).convert()
+        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
+        self.rect = self.surf.get_rect(center=start_pos)
+        self.speed = speed
+        self.start_pos_x = start_pos[0]
+        self.start_pos_y = start_pos[1]
+        self.dx = target_pos[0] - start_pos[0]
+        self.dy = target_pos[1] - start_pos[1]
+        self.distance = math.hypot(self.dx, self.dy)
+    def update(self):
+        # Calculate the new position of the sprite based on the distance and speed
+        # new_x = self.rect.centerx
+        # new_y = self.rect.centery
+        if self.distance != 0:
+            new_x = self.rect.centerx + (self.dx / (self.distance)) * self.speed
+            new_y = self.rect.centery + (self.dy / (self.distance)) * self.speed
+        else:
+            new_x = 0
+            new_y = 0
+        self.rect.center = (new_x, new_y)
+        if math.hypot(new_x - self.start_pos_x, new_y - self.start_pos_y) > 200:
+            self.kill()
 
 class Player():
     def __init__(self, image):
@@ -36,6 +63,7 @@ class Player():
         self.hp_lost = 0
         self.equipment = []
         self.level = 1
+        self.max_level = 10
         super(Player, self).__init__()
         self.surf = pygame.image.load(image).convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
@@ -43,13 +71,47 @@ class Player():
         self.rect = self.surf.get_rect()
         self.angle = 0
         self.speed = 2
-    
+        self.stunned = False
+        self.stunned_time = 0
+        self.time = -500
+    def level_up(self, lvlup_health, lvlup_atk):
+        if self.level < self.max_level:
+            self.level += 1
+            self.health += lvlup_health
+            self.max_health += lvlup_health
+            self.atk += lvlup_atk
+    def temp_health(self, health, duration):
+        original_health = self.health
+        self.health += health
+        time.sleep(duration)
+        if self.health >= original_health:
+            self.health = original_health
+
+    def is_stunned(self):
+        if self.stunned and time.time() < self.stunned_time:
+            return True
+        else:
+            self.stunned = False
+            return False
+        
+    def stun(self, duration):
+        self.stunned = True
+        self.stunned_time = time.time() + duration
+
     #mua do
     def buy(self, equip):
         # class equipment: price, atk, hp, ats, spd; 
         if self.money >= equip.price:
             self.monney -= equip.price
             self.equipment.append(equip)
+
+    def normal_attack(self, image, bullets):   
+        # if time - self.time > 500/self.ats:
+        self.time = time
+        start_pos = self.rect.center
+        target_pos = pygame.mouse.get_pos()
+        projectile = Projectile(self.speed * 20, start_pos, target_pos, image)
+        bullets.append(projectile)
     
     #di chuyen
     def update(self, left_click, middle_click, right_click):

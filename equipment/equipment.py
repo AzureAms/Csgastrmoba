@@ -2,7 +2,7 @@
 import pygame
 from pygame.locals import *
 pygame.init()
-from utils import *
+from tuong.utils import *
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
