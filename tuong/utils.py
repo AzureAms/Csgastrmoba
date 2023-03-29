@@ -55,8 +55,8 @@ class Projectile(pygame.sprite.Sprite):
 
 class Player():
     def __init__(self, image):
-        self.x = 300
-        self.y = 400
+        self.x = 960
+        self.y = 540
         self.ats = 1
         self.extra_ats = 1
         self.extra_hp = 0
@@ -71,6 +71,8 @@ class Player():
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         # self.surf = pygame.Surface((75,25))
         self.rect = self.surf.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
         self.angle = 0
         self.speed = 2
         self.stunned = False
@@ -106,13 +108,6 @@ class Player():
             self.monney -= equip.price
             self.equipment.append(equip)
 
-    def normal_attack(self, image, bullets):   
-        # if time - self.time > 500/self.ats:
-        self.time = time
-        start_pos = self.rect.center
-        target_pos = pygame.mouse.get_pos()
-        projectile = Projectile(self.speed * 20, start_pos, target_pos, image)
-        bullets.append(projectile)
     
     #di chuyen
     
@@ -121,12 +116,16 @@ class Player():
         cx, cy = pygame.mouse.get_pos()
         dx, dy = cx - self.x, cy - self.y
         if abs(dx) > 0 or abs(dy) > 0:
-            self.angle = math.atan2(-dx, -dy)*57.2957795
+            cx, cy = pygame.mouse.get_pos()
+            dx, dy = cx - self.x, cy - self.y
+            if abs(dx) > 0 or abs(dy) > 0:
+                self.angle = math.atan2(-dx, -dy)*57.2957795
 
-        img_copy = pygame.transform.rotate(self.surf, self.angle)
-        rotated_rect = img_copy.get_rect(center = (round(self.x), round(self.y)))
-        
-        win.blit(img_copy, rotated_rect)
+            img_copy = pygame.transform.rotate(self.surf, self.angle)
+            rotated_rect = img_copy.get_rect(center = (round(self.x), round(self.y)))
+            
+            win.blit(img_copy, rotated_rect)
+
     def move(self):
         cx, cy = pygame.mouse.get_pos()
         dx, dy = cx - self.x, cy - self.y
@@ -135,8 +134,8 @@ class Player():
             self.x += min(dist, self.speed) *10*dx/dist
             self.y += min(dist, self.speed) *10*dy/dist
             self.rect.center = (round(self.x), round(self.y))
-        # elif abs(dx) < 2 and abs(dy) < 2:
-        # 	self.rect.center = pygame.mouse.get_pos()
+        if abs(dx) < 10 and abs(dy) < 10:
+            self.rect.center = (self.x,self.y)
     def update(self, left_click, middle_click, right_click):
         if left_click:
             pass
