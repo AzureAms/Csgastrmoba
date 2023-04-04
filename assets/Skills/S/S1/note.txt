@@ -1,0 +1,6 @@
+phát ra những tia điện làm choáng những kẻ địch xung quanh 1s, tạo (200+ 10%hp) giáp ảo cho đồng đội
+
+chỉ choáng địch trong cái vòng thôi ( kiểu con sephera ấy)
+delay 1s rồi mới choáng
+
+tạo khiên cho tất cả đồng đội trong phạm vi
